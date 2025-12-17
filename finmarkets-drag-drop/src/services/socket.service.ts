@@ -1,48 +1,88 @@
-
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
-
-let socket: Socket;
-
-export function getSocket(): Socket {
-  if (!socket) {
-    socket = io(SOCKET_URL, {
-      transports: ["websocket"],
-    });
-  }
-  return socket;
-}
+let socket: Socket | null = null;
 
 export const socketService = {
   connect(username: string) {
-    const socket = getSocket();
-    socket.emit("user:join", { name: username });
+    if (socket) return;
+
+    const url = import.meta.env.VITE_SOCKET_URL;
+
+    if (!url) {
+      console.error("❌ VITE_SOCKET_URL no está definida");
+      return;
+    }
+
+    console.log("🔌 Conectando socket a:", url);
+
+    socket = io(url, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+
+    socket.on("connect", () => {
+      console.log("✅ Socket conectado:", socket?.id);
+      socket?.emit("user:join", { name: username });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔴 Socket desconectado");
+    });
   },
+
+  disconnect() {
+    if (!socket) return;
+
+    socket.disconnect();
+    socket = null;
+  },
+
+  getSocket(): Socket {
+    if (!socket) {
+      throw new Error("Socket no inicializado. Llama a connect() primero.");
+    }
+    return socket;
+  },
+
+  /* ======================
+     NOTES
+     ====================== */
 
   createNote() {
-    getSocket().emit("note:create");
+    this.getSocket().emit("note:create");
   },
 
-  updateNote(note: any) {
-    getSocket().emit("note:update", note);
+  updateNote(note: {
+    id: string;
+    title: string;
+    content: string;
+    x: number;
+    y: number;
+    timestamp: number;
+  }) {
+    this.getSocket().emit("note:update", note);
   },
 
   deleteNote(noteId: string) {
-    getSocket().emit("note:delete", noteId);
+    this.getSocket().emit("note:delete", { noteId });
   },
 
   addComment(noteId: string, text: string) {
-    getSocket().emit("note:comment", { noteId, text });
+    this.getSocket().emit("note:comment", {
+      noteId,
+      text,
+    });
   },
 
+  /* ======================
+     EDITING PRESENCE
+     ====================== */
+
   startEditing(noteId: string) {
-    getSocket().emit("note:editing:start", { noteId });
+    this.getSocket().emit("note:editing:start", { noteId });
   },
 
   stopEditing(noteId: string) {
-    getSocket().emit("note:editing:stop", { noteId });
+    this.getSocket().emit("note:editing:stop", { noteId });
   },
 };
-
