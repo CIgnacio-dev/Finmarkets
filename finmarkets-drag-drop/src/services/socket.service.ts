@@ -1,37 +1,48 @@
-import type { Note } from "../types/note";
-import { CLIENT_EVENTS } from "./socket.events";
-import { getSocket } from "./socket.client";
+
+import { io, Socket } from "socket.io-client";
+
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
+
+let socket: Socket;
+
+export function getSocket(): Socket {
+  if (!socket) {
+    socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+    });
+  }
+  return socket;
+}
 
 export const socketService = {
-  join(name: string) {
-    getSocket().emit(CLIENT_EVENTS.USER_JOIN, { name });
+  connect(username: string) {
+    const socket = getSocket();
+    socket.emit("user:join", { name: username });
   },
 
-  initBoard() {
-    getSocket().emit(CLIENT_EVENTS.BOARD_INIT);
+  createNote() {
+    getSocket().emit("note:create");
   },
 
-  createNote(payload: { title?: string; content?: string; x?: number; y?: number }) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_CREATE, payload);
+  updateNote(note: any) {
+    getSocket().emit("note:update", note);
   },
 
-  updateNote(note: Partial<Note> & { id: string }) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_UPDATE, note);
-  },
-
-  deleteNote(id: string) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_DELETE, { id });
+  deleteNote(noteId: string) {
+    getSocket().emit("note:delete", noteId);
   },
 
   addComment(noteId: string, text: string) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_COMMENT, { noteId, text });
+    getSocket().emit("note:comment", { noteId, text });
   },
+
   startEditing(noteId: string) {
-  getSocket().emit("note:editing:start", { noteId });
-},
+    getSocket().emit("note:editing:start", { noteId });
+  },
 
-stopEditing(noteId: string) {
-  getSocket().emit("note:editing:stop", { noteId });
-},
-
+  stopEditing(noteId: string) {
+    getSocket().emit("note:editing:stop", { noteId });
+  },
 };
+

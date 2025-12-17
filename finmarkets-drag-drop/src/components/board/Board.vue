@@ -10,13 +10,9 @@ const notesStore = useNotesStore();
 const notes = computed(() => notesStore.notes);
 
 function createNote() {
-  socketService.createNote({
-    title: "Nueva nota",
-    content: "",
-    x: 100 + Math.random() * 200,
-    y: 100 + Math.random() * 200,
-  });
+  socketService.createNote();
 }
+
 </script>
 
 <template>
