@@ -1,3 +1,4 @@
+@ -0,0 +1,43 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { socketService } from "../../services/socket.service";
@@ -10,9 +11,13 @@ const notesStore = useNotesStore();
 const notes = computed(() => notesStore.notes);
 
 function createNote() {
-  socketService.createNote();
+  socketService.createNote({
+    title: "Nueva nota",
+    content: "",
+    x: 100 + Math.random() * 200,
+    y: 100 + Math.random() * 200,
+  });
 }
-
 </script>
 
 <template>

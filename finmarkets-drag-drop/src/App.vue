@@ -1,7 +1,8 @@
+@ -0,0 +1,94 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { socketService } from "./services/socket.service";
-
+7
 import { useUsersStore } from "./stores/users.store";
 import { useNotesStore } from "./stores/notes.store";
 import { useUiStore } from "./stores/ui.store";
@@ -28,8 +29,9 @@ function joinBoard() {
   notesStore.bindSocketListeners();
   uiStore.bindSocketListeners();
 
-  socketService.connect(name);
+  socketService.join(name);
   notesStore.setLoading(true);
+  socketService.initBoard();
 }
 </script>
 

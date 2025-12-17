@@ -1,3 +1,4 @@
+@ -0,0 +1,209 @@
 <script setup lang="ts">
 import { ref, watch, computed, onBeforeUnmount } from "vue";
 import type { Note } from "../../types/note";
