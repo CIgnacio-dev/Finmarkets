@@ -37,7 +37,9 @@ Vitest
 
 happy-dom
 
-📂 Estructura del proyecto
+## 📂 Estructura del proyecto
+
+```txt
 Finmarkets/
 ├── backend/
 │   ├── server.js
@@ -62,9 +64,8 @@ Finmarkets/
     │   │   └── socket/
     │   │       └── socket.service.ts
     │   └── tests/
-    │       ├── components/
-    │       └── stores/
     └── vite.config.ts
+
 
 🧩 Arquitectura y responsabilidades
 Componentes
