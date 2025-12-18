@@ -29,9 +29,11 @@ function joinBoard() {
   notesStore.bindSocketListeners();
   uiStore.bindSocketListeners();
 
-  socketService.join(name);
+  socketService.connect(name);
+  socketService.requestPresence();
+  socketService.requestBoard();
   notesStore.setLoading(true);
-  socketService.initBoard();
+   
 }
 </script>
 

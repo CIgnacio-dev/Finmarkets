@@ -1,37 +1,89 @@
-import type { Note } from "../types/note";
-import { CLIENT_EVENTS } from "./socket.events";
-import { getSocket } from "./socket.client";
+import { io, Socket } from "socket.io-client";
+
+let socket: Socket | null = null;
 
 export const socketService = {
-  join(name: string) {
-    getSocket().emit(CLIENT_EVENTS.USER_JOIN, { name });
+  connect(username: string) {
+    if (socket) return;
+
+    const url = import.meta.env.VITE_SOCKET_URL;
+
+    if (!url) {
+      console.error("❌ VITE_SOCKET_URL no definida");
+      return;
+    }
+
+    //  Crear conexión
+    socket = io(url, {
+      transports: ["websocket"],
+    });
+
+    // -------------------------
+    //  LISTENERS DE CONEXIÓN
+    // -------------------------
+    socket.on("connect", () => {
+      console.log("✅ Socket conectado:", socket?.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.warn("⚠️ Socket desconectado");
+    });
+
+    socket.on("reconnect", () => {
+      console.info("🔄 Socket reconectado");
+    });
+
+    // -------------------------
+    // JOIN USUARIO
+    // -------------------------
+    socket.emit("user:join", { name: username });
   },
 
-  initBoard() {
-    getSocket().emit(CLIENT_EVENTS.BOARD_INIT);
+  getSocket(): Socket {
+    if (!socket) {
+      throw new Error("Socket no conectado");
+    }
+    return socket;
   },
 
-  createNote(payload: { title?: string; content?: string; x?: number; y?: number }) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_CREATE, payload);
+  disconnect() {
+    socket?.disconnect();
+    socket = null;
   },
 
-  updateNote(note: Partial<Note> & { id: string }) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_UPDATE, note);
+  // -------- Presencia --------
+  requestPresence() {
+    this.getSocket().emit("presence:request");
   },
 
-  deleteNote(id: string) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_DELETE, { id });
+  // -------- Board --------
+  requestBoard() {
+    this.getSocket().emit("board:init");
   },
 
+  createNote() {
+    this.getSocket().emit("note:create");
+  },
+
+  updateNote(note: any) {
+    this.getSocket().emit("note:update", note);
+  },
+
+  deleteNote(noteId: string) {
+    this.getSocket().emit("note:delete", { noteId });
+  },
+
+  // -------- Comentarios --------
   addComment(noteId: string, text: string) {
-    getSocket().emit(CLIENT_EVENTS.NOTE_COMMENT, { noteId, text });
+    this.getSocket().emit("note:comment", { noteId, text });
   },
+
+  // -------- Edición --------
   startEditing(noteId: string) {
-  getSocket().emit("note:editing:start", { noteId });
-},
+    this.getSocket().emit("note:editing:start", { noteId });
+  },
 
-stopEditing(noteId: string) {
-  getSocket().emit("note:editing:stop", { noteId });
-},
-
+  stopEditing(noteId: string) {
+    this.getSocket().emit("note:editing:stop", { noteId });
+  },
 };
