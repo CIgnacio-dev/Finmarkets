@@ -152,27 +152,29 @@ Los demás usuarios ven el mensaje:
 
 Se aplica un delay de 2 segundos al limpiar el estado para mejorar la percepción visual y evitar parpadeos.
 
-🧪 Testing
+🧪 ## Tests
 
-Se implementaron tests mínimos, tal como solicita el reto:
+El proyecto incluye una suite de tests implementada con **Vitest**, enfocada en validar tanto la lógica como los flujos críticos de la aplicación.
 
-2 tests de componentes
+### Tipos de tests incluidos
 
-Board.vue
+- **Tests unitarios**
+  - Stores (estado, mutaciones y manejo de errores)
+  - Lógica de servicios desacoplada del socket real
 
-NoteCard.vue
+- **Tests de componentes**
+  - Renderizado y comportamiento de componentes clave como `Board` y `NoteCard`
 
-1 test de lógica
+- **Tests de integración**
+  - Simulación del flujo completo del tablero:
+    - creación de notas
+    - actualización / movimiento
+    - comentarios
+  - Mock de eventos de Socket.IO para validar comportamiento end-to-end del frontend
 
-notes.store (estrategia last-write-wins)
-
-Los tests validan:
-
-Renderizado
-
-Interacciones del usuario
-
-Integración con services (usando spyOn sobre singletons)
+- **Tests de escenarios de fallo**
+  - Manejo de errores de conexión
+  - Estados de error y limpieza de UI
 
 Ejecutar tests:
 
@@ -198,6 +200,18 @@ npm run dev
 Aplicación disponible en:
 
 http://localhost:5173
+
+
+### CI & Coverage
+
+- La cobertura de código se mide mediante **Vitest (provider v8)**.
+- Existen **umbrales mínimos de cobertura configurados** para líneas, funciones, branches y statements.
+- El proyecto incluye un **pipeline de CI con GitHub Actions** que ejecuta la suite de tests y el reporte de coverage en cada push o pull request.
+
+> Actualmente el pipeline falla por no cumplir el umbral global de cobertura.  
+> Esto es esperado dado el alcance del challenge y el foco en flujos críticos y sincronización en tiempo real,  
+> pero demuestra que los controles de calidad y los thresholds están correctamente configurados.
+
 
 💡 Decisiones técnicas destacadas
 
